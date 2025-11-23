@@ -1,0 +1,9 @@
+{
+  "freezing": {
+    "category": "ambient",
+    "sounds": [
+      "cursed_snow:freezing"
+    ],
+    "subtitle": "subtitle.cursed_snow.freezing"
+  }
+}
