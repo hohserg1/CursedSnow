@@ -15,4 +15,7 @@ public class Configuration {
         "example: \"minecraft:snow_layer#layers=9\""
     })
     public static String[] extraSnowLikeBlocksModelLocations = {};
+
+    @Comment("list of dimension id's where no hardcode snowfall and chill damage")
+    public static int[] hardcoreDimensionsBlacklist = {};
 }

@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.{AxisAlignedBB, BlockPos}
 import net.minecraft.world.IBlockAccess
+import net.minecraft.world.{IBlockAccess, World}
 
 import java.util
 import scala.annotation.tailrec
@@ -104,4 +105,7 @@ package object snow {
     else
       math.max(0, v - 3)
   }
+
+  def isHardcoreSnowDimension(world: World): Boolean =
+    !ConfigCache.hardcoreDimensionsBlacklist.contains(world.provider.getDimension)
 }

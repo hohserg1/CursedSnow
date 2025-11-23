@@ -11,7 +11,7 @@ object ColdDamageServer {
   @SubscribeEvent
   def tick(e: PlayerTickEvent): Unit = {
     e.player match {
-      case player: EntityPlayerMP =>
+      case player: EntityPlayerMP if isHardcoreSnowDimension(player.world) =>
         val inSnowTime = ColdDamageLens.inSnowTime.get(player)
         ColdDamageLens.inSnowTime.set(player, progressInSnowTime(player, inSnowTime))
         if (inSnowTime > maxInSnowTime / 3) {

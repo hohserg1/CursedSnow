@@ -52,7 +52,9 @@ object ColdDamageClientIndicator {
       val player = Minecraft.getMinecraft.player
       if (player != null) {
         if (!Minecraft.getMinecraft.isGamePaused) {
-          inSnowTime = progressInSnowTime(player, inSnowTime)
+          if (isHardcoreSnowDimension(player.world)) {
+            inSnowTime = progressInSnowTime(player, inSnowTime)
+          }
         }
       }
     }

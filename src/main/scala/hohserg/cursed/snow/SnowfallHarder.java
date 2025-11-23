@@ -15,7 +15,7 @@ public class SnowfallHarder {
     @OnMethodCall("isAir")
     public static ReturnSolve<Boolean> canSnowAtBody(World world, BlockPos pos, boolean checkLight,
                                                      @LocalVariable(id = 5) IBlockState iblockstate1) {
-        if (package$.MODULE$.isSnow(iblockstate1) && iblockstate1.getValue(BlockSnow.LAYERS) < 8)
+        if (package$.MODULE$.isSnow(iblockstate1) && iblockstate1.getValue(BlockSnow.LAYERS) < 8 && package$.MODULE$.isHardcoreSnowDimension(world))
             return ReturnSolve.yes(true);
         else
             return ReturnSolve.no();
@@ -41,14 +41,16 @@ public class SnowfallHarder {
     public static BlockPos snowingOverSnow(Chunk chunk, BlockPos pos,
                                            @LocalVariable(id = 4) int k,
                                            @ReturnValue BlockPos result) {
-        IBlockState top = chunk.getBlockState(result);
-        if (isFullSnow(top)) {
-            while (isFullSnow(top)) {
-                result = result.up();
-                top = chunk.getBlockState(result);
+        if (package$.MODULE$.isHardcoreSnowDimension(chunk.getWorld())) {
+            IBlockState top = chunk.getBlockState(result);
+            if (isFullSnow(top)) {
+                while (isFullSnow(top)) {
+                    result = result.up();
+                    top = chunk.getBlockState(result);
+                }
+                precipitationHeightMap.get(chunk)[k] = result.getY();
+                return result;
             }
-            precipitationHeightMap.get(chunk)[k] = result.getY();
-            return result;
         }
         return result;
     }

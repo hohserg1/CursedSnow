@@ -16,6 +16,7 @@ object ConfigCache {
   }
 
   private var snowBaseBlacklistCache: Set[Block] = null
+  private var hardcoreDimensionsBlacklistCache: Set[Int] = null
 
   private def rebuild(): Unit = {
     snowBaseBlacklistCache = Configuration.snowBaseBlacklist
@@ -24,11 +25,19 @@ object ConfigCache {
                                           .filter(_ != null)
                                           .filter(_ != Blocks.AIR)
                                           .toSet
+
+    hardcoreDimensionsBlacklistCache = Configuration.hardcoreDimensionsBlacklist.toSet
   }
 
   def snowBaseBlacklist: Set[Block] = {
     if (snowBaseBlacklistCache == null)
       rebuild()
     snowBaseBlacklistCache
+  }
+
+  def hardcoreDimensionsBlacklist: Set[Int] = {
+    if (hardcoreDimensionsBlacklistCache == null)
+      rebuild()
+    hardcoreDimensionsBlacklistCache
   }
 }
