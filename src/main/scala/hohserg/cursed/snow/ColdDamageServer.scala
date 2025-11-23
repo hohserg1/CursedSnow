@@ -4,11 +4,9 @@ import net.minecraft.block.material.Material
 import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.util.{DamageSource, SoundCategory, SoundEvent}
 import net.minecraftforge.event.RegistryEvent
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent
 
-@EventBusSubscriber
 object ColdDamageServer {
   @SubscribeEvent
   def tick(e: PlayerTickEvent): Unit = {

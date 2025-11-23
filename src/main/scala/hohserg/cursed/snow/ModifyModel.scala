@@ -15,13 +15,11 @@ import net.minecraft.world.IBlockAccess
 import net.minecraftforge.client.event.ModelBakeEvent
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad
 import net.minecraftforge.common.property.{ExtendedBlockState, IExtendedBlockState, IUnlistedProperty}
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 import java.util.{List => JList}
 import scala.collection.JavaConverters._
 
-@EventBusSubscriber
 @HookContainer
 object ModifyModel {
 

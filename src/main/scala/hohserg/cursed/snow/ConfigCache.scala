@@ -4,11 +4,9 @@ import net.minecraft.block.Block
 import net.minecraft.init.Blocks
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.PostConfigChangedEvent
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.registry.ForgeRegistries
 
-@EventBusSubscriber
 object ConfigCache {
   @SubscribeEvent
   def onConfigChange(e: PostConfigChangedEvent): Unit = {

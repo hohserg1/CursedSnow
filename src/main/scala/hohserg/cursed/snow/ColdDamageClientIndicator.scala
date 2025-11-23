@@ -6,13 +6,11 @@ import net.minecraft.client.renderer.{GlStateManager, Tessellator}
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber
 import net.minecraftforge.fml.common.eventhandler.{EventPriority, SubscribeEvent}
 import net.minecraftforge.fml.common.gameevent.TickEvent.{ClientTickEvent, Phase}
 import net.minecraftforge.fml.relauncher.Side
 import org.lwjgl.opengl.GL11
 
-@EventBusSubscriber(value = Array(Side.CLIENT))
 object ColdDamageClientIndicator {
 
   var inSnowTime = 0
