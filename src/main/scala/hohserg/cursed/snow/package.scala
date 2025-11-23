@@ -8,8 +8,8 @@ import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.{AxisAlignedBB, BlockPos}
-import net.minecraft.world.IBlockAccess
 import net.minecraft.world.{IBlockAccess, World}
+import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
 import java.util
 import scala.annotation.tailrec
@@ -60,6 +60,7 @@ package object snow {
   }
 
 
+  @SideOnly(Side.CLIENT)
   def getBaseRelatedLocalBoxes(world: IBlockAccess, snowPos: BlockPos): Seq[Box] = {
     val height = world.getBlockState(snowPos).getValue(BlockSnow.LAYERS) * 1d / 8
     val (pos, state) = getBottomNonSnowBlock(world, snowPos)
@@ -90,6 +91,7 @@ package object snow {
       .foldLeft(if (haveFullBlockDown) Seq(Box(0, -1, 0, 1, -1 + snowHeight, 1)) else Seq.empty)(addTopBox)
   })
 
+  @SideOnly(Side.CLIENT)
   def getBaseRelatedAbsoluteBoxes(world: IBlockAccess, snowPos: BlockPos): Seq[AxisAlignedBB] = {
     getBaseRelatedLocalBoxes(world, snowPos).map(_.offsetAABB(snowPos))
   }

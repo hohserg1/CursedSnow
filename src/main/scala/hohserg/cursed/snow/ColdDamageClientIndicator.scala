@@ -8,9 +8,10 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import net.minecraftforge.fml.common.eventhandler.{EventPriority, SubscribeEvent}
 import net.minecraftforge.fml.common.gameevent.TickEvent.{ClientTickEvent, Phase}
-import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import org.lwjgl.opengl.GL11
 
+@SideOnly(Side.CLIENT)
 object ColdDamageClientIndicator {
 
   var inSnowTime = 0

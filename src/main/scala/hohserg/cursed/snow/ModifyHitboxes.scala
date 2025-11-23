@@ -9,6 +9,7 @@ import net.minecraft.item.ItemSnow
 import net.minecraft.util.math.{AxisAlignedBB, BlockPos}
 import net.minecraft.util.{EnumFacing, EnumHand}
 import net.minecraft.world.{IBlockAccess, World}
+import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
 @HookContainer
 object ModifyHitboxes {
@@ -29,6 +30,7 @@ object ModifyHitboxes {
   def placingNextLayerByHand2(itemSnow: ItemSnow, player: EntityPlayer, worldIn: World, pos: BlockPos, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean =
     true
 
+  @SideOnly(Side.CLIENT)
   @Hook(createMethod = true)
   @OnBegin
   def getSelectedBoundingBox(blockSnow: BlockSnow, state: IBlockState, worldIn: World, pos: BlockPos): ReturnSolve[AxisAlignedBB] = {
