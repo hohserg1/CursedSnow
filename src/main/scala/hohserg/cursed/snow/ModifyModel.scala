@@ -85,12 +85,9 @@ object ModifyModel {
       state match {
         case extended: IExtendedBlockState =>
           val baseBoxes = extended.getValue(blockBaseProperty)
-          if (baseBoxes != null) {
-            val start = System.nanoTime()
-            val r = baseBoxes.flatMap(makeSnowBoxMem).asJava
-            println(System.nanoTime() - start)
-            r
-          } else
+          if (baseBoxes != null)
+            baseBoxes.flatMap(makeSnowBoxMem).asJava
+          else
             defaultModel(extended.getValue(BlockSnow.LAYERS))
         case simple =>
           ImmutableList.of()
