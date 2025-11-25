@@ -65,8 +65,18 @@ package object snow {
     val height = world.getBlockState(snowPos).getValue(BlockSnow.LAYERS) * 1d / 8
     val (pos, state) = getBottomNonSnowBlock(world, snowPos)
     val haveFullBlockDown = world.isSideSolid(pos.down, EnumFacing.UP, false)
+
+    val reallyWorld = Minecraft.getMinecraft.world
+
     val baseBoxes = new util.ArrayList[AxisAlignedBB]()
-    state.getBlock.addCollisionBoxToList(state, Minecraft.getMinecraft.world, pos, new AxisAlignedBB(pos), baseBoxes, null, true)
+
+    val b = state.getSelectedBoundingBox(reallyWorld, pos)
+
+    if (ConfigCache.selectionHitboxUsingWhitelist.contains(state.getBlock) && b != null)
+      baseBoxes.add(b)
+    else
+      state.getBlock.addCollisionBoxToList(state, reallyWorld, pos, new AxisAlignedBB(pos), baseBoxes, null, true)
+
     overlapBoxes((
       baseBoxes.asScala
                .map { aabb =>

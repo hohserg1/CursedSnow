@@ -18,4 +18,7 @@ public class Configuration {
 
     @Comment("list of dimension id's where no hardcode snowfall and chill damage")
     public static int[] hardcoreDimensionsBlacklist = {};
+
+    @Comment("list of block's registry names of which snow model will use selection hitboxes instead of collision hitboxes")
+    public static String[] selectionHitboxUsingWhitelist = {};
 }

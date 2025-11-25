@@ -16,23 +16,36 @@ object ConfigCache {
   }
 
   private var snowBaseBlacklistCache: Set[Block] = null
+  private var selectionHitboxUsingWhitelistCache: Set[Block] = null
   private var hardcoreDimensionsBlacklistCache: Set[Int] = null
 
   private def rebuild(): Unit = {
-    snowBaseBlacklistCache = Configuration.snowBaseBlacklist
-                                          .map(new ResourceLocation(_))
-                                          .map(ForgeRegistries.BLOCKS.getValue)
-                                          .filter(_ != null)
-                                          .filter(_ != Blocks.AIR)
-                                          .toSet
+    snowBaseBlacklistCache = blockSet(Configuration.snowBaseBlacklist)
+
+    selectionHitboxUsingWhitelistCache = blockSet(Configuration.selectionHitboxUsingWhitelist)
 
     hardcoreDimensionsBlacklistCache = Configuration.hardcoreDimensionsBlacklist.toSet
+  }
+
+  private def blockSet(config: Array[String]) = {
+    config
+      .map(new ResourceLocation(_))
+      .map(ForgeRegistries.BLOCKS.getValue)
+      .filter(_ != null)
+      .filter(_ != Blocks.AIR)
+      .toSet
   }
 
   def snowBaseBlacklist: Set[Block] = {
     if (snowBaseBlacklistCache == null)
       rebuild()
     snowBaseBlacklistCache
+  }
+
+  def selectionHitboxUsingWhitelist: Set[Block] = {
+    if (selectionHitboxUsingWhitelistCache == null)
+      rebuild()
+    selectionHitboxUsingWhitelistCache
   }
 
   def hardcoreDimensionsBlacklist: Set[Int] = {
