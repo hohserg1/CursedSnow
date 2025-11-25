@@ -85,9 +85,12 @@ object ModifyModel {
       state match {
         case extended: IExtendedBlockState =>
           val baseBoxes = extended.getValue(blockBaseProperty)
-          if (baseBoxes != null)
-            baseBoxes.flatMap(makeSnowBoxMem).asJava
-          else
+          if (baseBoxes != null) {
+            val start = System.nanoTime()
+            val r = baseBoxes.flatMap(makeSnowBoxMem).asJava
+            println(System.nanoTime() - start)
+            r
+          } else
             defaultModel(extended.getValue(BlockSnow.LAYERS))
         case simple =>
           ImmutableList.of()
@@ -95,6 +98,28 @@ object ModifyModel {
     }
 
     val defaultModel: Int => JList[BakedQuad] = Memoized(l => makeSnowBoxMem(Box(0, 0, 0, 1, l * 1d / 8, 1)).asJava)
+
+    lazy val baseQuad = LazyUnpackedQuad(emptyQuad)
+      .reconstruct(
+        v1_u = texture.getMinU, v1_v = texture.getMinV, v1_lu = 0, v1_lv = 0,
+        v2_u = texture.getMaxU, v2_v = texture.getMinV, v2_lu = 0, v2_lv = 0,
+        v3_u = texture.getMaxU, v3_v = texture.getMaxV, v3_lu = 0, v3_lv = 0,
+        v4_u = texture.getMinU, v4_v = texture.getMaxV, v4_lu = 0, v4_lv = 0
+      )
+
+    lazy val baseXSideQuad = baseQuad.reconstruct(
+      v1_x = 0, v1_y = 0, v1_z = 0,
+      v2_x = 0, v2_y = 0, v2_z = 1,
+      v3_x = 0, v3_y = 1, v3_z = 1,
+      v4_x = 0, v4_y = 1, v4_z = 0
+    )
+
+    lazy val baseZSideQuad = baseQuad.reconstruct(
+      v1_x = 0, v1_y = 0, v1_z = 0,
+      v2_x = 1, v2_y = 0, v2_z = 0,
+      v3_x = 1, v3_y = 1, v3_z = 0,
+      v4_x = 0, v4_y = 1, v4_z = 0
+    )
 
     val makeSnowBoxMem: Box => Seq[BakedQuad] = Memoized({
       box: Box =>
@@ -108,30 +133,20 @@ object ModifyModel {
         val w = maxX - minX
         val h = maxY - minY
         val d = maxZ - minZ
-
-        val baseQuad = LazyUnpackedQuad.apply(emptyQuad)
-                                       .reconstruct(
-                                         v1_u = texture.getMinU, v1_v = texture.getMinV, v1_lu = 0, v1_lv = 0,
-                                         v2_u = texture.getMaxU, v2_v = texture.getMinV, v2_lu = 0, v2_lv = 0,
-                                         v3_u = texture.getMaxU, v3_v = texture.getMaxV, v3_lu = 0, v3_lv = 0,
-                                         v4_u = texture.getMinU, v4_v = texture.getMaxV, v4_lu = 0, v4_lv = 0
-                                       )
-        val xSideQuad = baseQuad.reconstruct(
-                                  v1_x = minX, v1_y = 0, v1_z = 0,
-                                  v2_x = minX, v2_y = 0, v2_z = 1,
-                                  v3_x = minX, v3_y = 1, v3_z = 1,
-                                  v4_x = minX, v4_y = 1, v4_z = 0
-                                )
-                                .slice(minZ, 0, maxZ, 0, maxZ, h, minZ, h)
-                                .reconstruct(v1_y = minY, v2_y = minY, v3_y = maxY, v4_y = maxY)
-        val zSideQuad = baseQuad.reconstruct(
-                                  v1_x = 0, v1_y = 0, v1_z = minZ,
-                                  v2_x = 1, v2_y = 0, v2_z = minZ,
-                                  v3_x = 1, v3_y = 1, v3_z = minZ,
-                                  v4_x = 0, v4_y = 1, v4_z = minZ
-                                )
-                                .slice(minX, 0, maxX, 0, maxX, h, minX, h)
-                                .reconstruct(v1_y = minY, v2_y = minY, v3_y = maxY, v4_y = maxY)
+        val xSideQuad = baseXSideQuad.slice(minZ, 0, maxZ, 0, maxZ, h, minZ, h)
+                                     .reconstruct(
+                                       v1_x = minX, v1_y = minY,
+                                       v2_x = minX, v2_y = minY,
+                                       v3_x = minX, v3_y = maxY,
+                                       v4_x = minX, v4_y = maxY
+                                     )
+        val zSideQuad = baseZSideQuad.slice(minX, 0, maxX, 0, maxX, h, minX, h)
+                                     .reconstruct(
+                                       v1_y = minY, v1_z = minZ,
+                                       v2_y = minY, v2_z = minZ,
+                                       v3_y = maxY, v3_z = minZ,
+                                       v4_y = maxY, v4_z = minZ
+                                     )
         Seq(
           baseQuad.reconstruct(
                     v1_x = 0, v1_y = maxY, v1_z = 0,
