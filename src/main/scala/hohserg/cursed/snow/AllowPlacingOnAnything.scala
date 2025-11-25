@@ -16,12 +16,10 @@ object AllowPlacingOnAnything {
     val base = baseState.getBlock
     if (ConfigCache.snowBaseBlacklist.contains(base))
       false
-    else if (Configuration.blacklistAllSlabs)
-      !base.isInstanceOf[BlockSlab]
     else if (isSnow(baseState))
       baseState.getValue(BlockSnow.LAYERS) == 8
     else
-      base != Blocks.AIR
+      base != Blocks.AIR && (!Configuration.blacklistAllSlabs || !base.isInstanceOf[BlockSlab])
   }
 
 }
