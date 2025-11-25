@@ -172,7 +172,7 @@ object ModifyModel {
       builder.build()
     }
 
-    override def isAmbientOcclusion: Boolean = false
+    override def isAmbientOcclusion: Boolean = true
 
     override def isGui3d: Boolean = true
 
