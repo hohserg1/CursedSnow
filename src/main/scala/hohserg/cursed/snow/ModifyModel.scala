@@ -34,17 +34,6 @@ object ModifyModel {
     override def valueToString(value: Seq[Box]): String = value.toString
   }
 
-  @Hook
-  @OnReturn
-  def createBlockState(blockSnow: BlockSnow, @ReturnValue result: BlockStateContainer @ReturnValue): BlockStateContainer = {
-    result match {
-      case extended: ExtendedBlockState =>
-        new ExtendedBlockState(blockSnow, extended.getProperties.asScala.toArray, extended.getUnlistedProperties.asScala.toArray :+ blockBaseProperty)
-      case simple =>
-        new ExtendedBlockState(blockSnow, simple.getProperties.asScala.toArray, Array(blockBaseProperty))
-    }
-  }
-
   @Hook(createMethod = true)
   @OnBegin
   def getExtendedState(blockSnow: BlockSnow, state: IBlockState, world: IBlockAccess, pos: BlockPos): IBlockState = {

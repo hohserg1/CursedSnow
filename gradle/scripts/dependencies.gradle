@@ -25,6 +25,8 @@ repositories {
 }
 
 dependencies {
+    runtimeOnly "com.cleanroommc:scalar:1.0.0"
+    
     implementation "_ABC:hooklib:+"
     extraLibs "_ABC:Endothermic:3.1.0"
 
