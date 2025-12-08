@@ -1,0 +1,33 @@
+apply from: 'gradle/scripts/helpers.gradle'
+
+repositories {
+    // Other repositories described by default:
+    // CleanroomMC: https://maven.cleanroommc.com
+    maven {
+        name 'CurseMaven'
+        url 'https://curse.cleanroommc.com'
+    }
+    maven {
+        name 'Modrinth'
+        url 'https://api.modrinth.com/maven'
+    }
+    maven {
+        name "outlandsReleases"
+        url "https://maven.arcseekers.com/releases"
+    }
+    mavenLocal() // Must be last for caching to work
+    flatDir {
+        dirs "${project.rootDir}/libs"
+    }
+    flatDir {
+        dirs 'F:\\Development\\modding\\_artifacts_'
+    }
+}
+
+dependencies {
+    implementation "_ABC:hooklib:+"
+    extraLibs "_ABC:Endothermic:2.1.8"
+
+    compileOnly "abc:SnowRealMagic:1.12.2-0.7.4-deobf"
+    compileOnly "abc:Kiwi:1.12.2-0.5.3.32-deobf"
+}

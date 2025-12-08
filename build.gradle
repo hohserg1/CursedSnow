@@ -1,98 +1,260 @@
-apply plugin: 'idea'
+plugins {
+    id 'java'
+    id 'scala'
+    id 'java-library'
+    id 'maven-publish'
+    id 'com.gradleup.shadow' version '9.0.2'
+    id 'xyz.wagyourtail.unimined' version '1.4.1'
+    id 'net.kyori.blossom' version '2.1.0'
+}
+
+apply from: 'gradle/scripts/helpers.gradle'
+
+// Early Assertions
+assertProperty 'mod_version'
+assertProperty 'root_package'
+assertProperty 'mod_id'
+assertProperty 'mod_name'
+
+assertSubProperties 'use_access_transformer', 'access_transformer_locations'
+assertSubProperties 'is_coremod', 'coremod_includes_mod', 'coremod_plugin_class_name'
+assertSubProperties 'use_asset_mover', 'asset_mover_version'
+
+setDefaultProperty 'generate_sources_jar', true, false
+setDefaultProperty 'generate_javadocs_jar', true, false
+setDefaultProperty 'minecraft_username', true, 'Developer'
+setDefaultProperty 'extra_jvm_args', false, ''
+
 idea.module.inheritOutputDirs = true
 
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net/' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.48'
-    }
+version = propertyString('mod_version')
+group = propertyString('root_package')
+
+base {
+    archivesName.set(propertyString('mod_id'))
 }
 
-apply plugin: 'scala'
-apply plugin: 'net.minecraftforge.gradle'
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-
-version = '1.7'
-group = 'hohsereg.cursed.snow' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'CursedSnow'
-
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
+scala {
+    scalaVersion = '3.7.2'
 }
 
-minecraft {
-    mappings channel: 'stable', version: '39-1.12'
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
-
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-    runs {
-        client {
-            workingDirectory project.file('run_client')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-            property 'fml.coreMods.load', 'gloomyfolken.hooklib.minecraft.MainHookLoader'
-        }
-
-        server {
-            workingDirectory project.file('run_server')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-            property 'fml.coreMods.load', 'gloomyfolken.hooklib.minecraft.MainHookLoader'
-        }
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
-}
-
-repositories {
-    flatDir {
-        dirs "${project.rootDir}/libs"
+    if (propertyBool('generate_sources_jar')) {
+        withSourcesJar()
     }
-    flatDir {
-        dirs 'F:\\Development\\modding\\_artifacts_'
+    if (propertyBool('generate_javadocs_jar')) {
+        withJavadocJar()
     }
 }
 
 configurations {
     extraLibs { transitive = false }
     implementation.extendsFrom extraLibs
+    embed
+    contain
+    implementation.extendsFrom(embed)
+    implementation.extendsFrom(contain)
+    modCompileOnly
+    compileOnly.extendsFrom(modCompileOnly)
+    modRuntimeOnly
+    runtimeOnly.extendsFrom(modRuntimeOnly)
+}
+
+unimined.minecraft {
+    version "1.12.2"
+
+    mappings {
+        mcp("stable", "39-1.12")
+    }
+
+    cleanroom {
+        if (propertyBool('use_access_transformer')) {
+            accessTransformer "${rootProject.projectDir}/src/main/resources/" + propertyString('access_transformer_locations')
+        }
+        loader "0.3.16-alpha"
+        runs.auth.username = minecraft_username
+        runs.all {
+            def extraArgs = propertyString('extra_jvm_args')
+            if (extraArgs != null && !extraArgs.trim().isEmpty()) {
+                jvmArgs += extraArgs.split("\\s+").toList()
+            }
+            if (propertyBool('enable_foundation_debug')) {
+                var map = getSystemProperties()
+                map.put("foundation.dump", "true")
+                map.put("foundation.verbose", "true")
+            }
+            return
+        }
+    }
+
+    defaultRemapJar = false
+
+    if (propertyBool('enable_shadow')) {
+        remap(tasks.shadowJar) {
+            mixinRemap {
+                enableBaseMixin()
+                enableMixinExtra()
+                disableRefmap()
+            }
+        }
+    } else {
+        remap(tasks.jar) {
+            mixinRemap {
+                enableBaseMixin()
+                enableMixinExtra()
+                disableRefmap()
+            }
+        }
+    }
+
+    mods {
+        remap(configurations.modCompileOnly)
+    }
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
+    if (propertyBool('use_asset_mover')) {
+        implementation "com.cleanroommc:assetmover:${propertyString('asset_mover_version')}"
+    }
+    if (propertyBool('enable_junit_testing')) {
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+}
 
-    implementation "_ABC:hooklib:+"
-    extraLibs "_ABC:Endothermic:2.1.8"
+apply from: 'gradle/scripts/dependencies.gradle'
 
-    compileOnly "abc:SnowRealMagic:1.12.2-0.7.4-deobf"
-    compileOnly "abc:Kiwi:1.12.2-0.5.3.32-deobf"
+processResources {
+
+    inputs.property 'mod_id', propertyString('mod_id')
+    inputs.property 'mod_name', propertyString('mod_name')
+    inputs.property 'mod_version', propertyString('mod_version')
+    inputs.property 'mod_description', propertyString('mod_description')
+    inputs.property 'mod_authors', "${propertyStringList('mod_authors', ',').join(', ')}"
+    inputs.property 'mod_credits', propertyString('mod_credits')
+    inputs.property 'mod_url', propertyString('mod_url')
+    inputs.property 'mod_update_json', propertyString('mod_update_json')
+    inputs.property 'mod_logo_path', propertyString('mod_logo_path')
+
+    def filterList = ['mcmod.info', 'pack.mcmeta']
+
+    filesMatching(filterList) { fcd ->
+        fcd.expand(
+                'mod_id': propertyString('mod_id'),
+                'mod_name': propertyString('mod_name'),
+                'mod_version': propertyString('mod_version'),
+                'mod_description': propertyString('mod_description'),
+                'mod_authors': "${propertyStringList('mod_authors', ',').join(', ')}",
+                'mod_credits': propertyString('mod_credits'),
+                'mod_url': propertyString('mod_url'),
+                'mod_update_json': propertyString('mod_update_json'),
+                'mod_logo_path': propertyString('mod_logo_path'),
+        )
+    }
+
+    rename '(.+_at.cfg)', 'META-INF/$1'
+}
+
+sourceSets {
+    main {
+        blossom {
+            scalaSources {
+                property('mod_id', propertyString('mod_id'))
+                property('mod_name', propertyString('mod_name'))
+                property('mod_version', propertyString('mod_version'))
+                property('package', "${root_package}.${mod_id}")
+            }
+        }
+    }
+}
+
+if (!propertyBool('enable_shadow')) {
+    shadowJar.enabled = false
 }
 
 jar {
     from {
         configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     destinationDirectory = file("$rootDir/production")
-}
-
-jar.finalizedBy('reobfJar')
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact jar
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    if (configurations.contain.size() > 0) {
+        into('/') {
+            from configurations.contain
         }
     }
-    repositories {
-        maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
+    doFirst {
+        manifest {
+            def attribute_map = [:]
+            attribute_map['ModType'] = "CRL"
+            if (configurations.contain.size() > 0) {
+                attribute_map['ContainedDeps'] = configurations.contain.collect { it.name }.join(' ')
+                attribute_map['NonModDeps'] = true
+            }
+            if (propertyBool('is_coremod')) {
+                attribute_map['FMLCorePlugin'] = propertyString('coremod_plugin_class_name')
+                if (propertyBool('coremod_includes_mod')) {
+                    attribute_map['FMLCorePluginContainsFMLMod'] = true
+                }
+            }
+            if (propertyBool('use_access_transformer')) {
+                attribute_map['FMLAT'] = propertyString('access_transformer_locations')
+            }
+            attributes(attribute_map)
+        }
+    }
+    if (propertyBool('enable_shadow')) {
+        finalizedBy(tasks.named("remapShadowJar"))
+    } else {
+        finalizedBy(tasks.named("remapJar"))
+    }
+}
+
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+    archiveClassifier = "shadow"
+}
+
+remapJar {
+    doFirst {
+        logging.captureStandardOutput LogLevel.INFO
+    }
+    doLast {
+        logging.captureStandardOutput LogLevel.QUIET
+    }
+}
+
+compileTestJava {
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_21
+}
+
+test {
+    useJUnitPlatform()
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(21)
+    })
+    if (propertyBool('show_testing_output')) {
+        testLogging {
+            showStandardStreams = true
         }
     }
 }
+
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(ScalaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    scalaCompileOptions.additionalParameters = [
+            "-Wconf:msg=int2float:s", // I dont care about int->float precission at this project
+    ]
+}
+
+apply from: 'gradle/scripts/publishing.gradle'
+apply from: 'gradle/scripts/extra.gradle'

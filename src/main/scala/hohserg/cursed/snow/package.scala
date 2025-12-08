@@ -13,7 +13,7 @@ import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
 import java.util
 import scala.annotation.tailrec
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters.*
 
 package object snow {
 
@@ -21,6 +21,14 @@ package object snow {
     val n = implicitly[Numeric[N]]
     n.max(n.min(v, max), min)
   }
+
+  def println(v: Any*): Unit = {
+    if (v.size == 1)
+      Predef.println(v.head)
+    else
+      Predef.println(v.mkString("(", ", ", ")"))
+  }
+
 
   @tailrec
   def getBottomNonSnowBlock(world: IBlockAccess, pos: BlockPos): (BlockPos, IBlockState) = {
@@ -78,7 +86,7 @@ package object snow {
       state.getBlock.addCollisionBoxToList(state, reallyWorld, pos, new AxisAlignedBB(pos), baseBoxes, null, true)
 
     overlapBoxes((
-      baseBoxes.asScala
+      baseBoxes.asScala.toSeq
                .map { aabb =>
                  val y = prepareCoord(aabb.maxY, pos.getY)
                  Box(

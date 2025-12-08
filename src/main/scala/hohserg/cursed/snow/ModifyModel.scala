@@ -1,7 +1,7 @@
 package hohserg.cursed.snow
 
 import com.google.common.collect.ImmutableList
-import gloomyfolken.hooklib.api._
+import gloomyfolken.hooklib.api.*
 import hohserg.endothermic.quad.immutable.LazyUnpackedQuad
 import net.minecraft.block.BlockSnow
 import net.minecraft.block.state.{BlockStateContainer, IBlockState}
@@ -18,8 +18,8 @@ import net.minecraftforge.common.property.{ExtendedBlockState, IExtendedBlockSta
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import java.util.{List => JList}
-import scala.collection.JavaConverters._
+import java.util.List as JList
+import scala.jdk.CollectionConverters.*
 
 @HookContainer
 object ModifyModel {
@@ -75,7 +75,7 @@ object ModifyModel {
   }
 
   def prepareCoord(v: Double, pos: Int): Double =
-    (clamp(v, pos, pos + 1) - pos).toFloat
+    (clamp[Double](v, pos, pos + 1) - pos).toFloat
 
   @SideOnly(Side.CLIENT)
   object ComplicatedSnowModel extends IBakedModel {
@@ -88,7 +88,7 @@ object ModifyModel {
           if (baseBoxes != null)
             baseBoxes.flatMap(makeSnowBoxMem).asJava
           else
-            defaultModel(extended.getValue(BlockSnow.LAYERS))
+            defaultModel(extended.getValue(BlockSnow.LAYERS).intValue())
         case simple =>
           ImmutableList.of()
       }
@@ -119,7 +119,7 @@ object ModifyModel {
     )
 
     val makeSnowBoxMem: Box => Seq[BakedQuad] = Memoized({
-      box: Box =>
+      (box: Box) =>
         val minX = box.x.toFloat
         val maxX = box.x2.toFloat
         val minY = box.y.toFloat

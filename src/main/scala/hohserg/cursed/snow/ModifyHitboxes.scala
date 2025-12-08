@@ -59,7 +59,7 @@ object ModifyHitboxes {
       val slowdown = (9 - layers) * 0.1f
       entityIn.fallDistance -= layers
       entityIn.motionX *= slowdown
-      entityIn.motionY *= clamp(slowdown * 1.5f, 0, 0.95)
+      entityIn.motionY *= clamp(slowdown * 1.5f, 0f, 0.95f)
       entityIn.motionZ *= slowdown
     }
   }
