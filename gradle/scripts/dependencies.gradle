@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     implementation "_ABC:hooklib:+"
-    extraLibs "_ABC:Endothermic:2.1.8"
+    extraLibs "_ABC:Endothermic:3.1.0"
 
     compileOnly "abc:SnowRealMagic:1.12.2-0.7.4-deobf"
     compileOnly "abc:Kiwi:1.12.2-0.5.3.32-deobf"
